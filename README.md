@@ -47,3 +47,15 @@ para inicar la app
 
 npm run dev & 
 para usarlo sin la terminal, pero ahi es tu problema como lo cierras.
+
+
+## Limpiar completamente los volúmenes de Docker
+
+Para **detener y borrar** todos los contenedores, redes y volúmenes (incluyendo dependencias como `node_modules` y los datos de la base de datos), ejecuta:
+
+```bash
+sudo docker compose down -v
+```
+
+sudo docker compose build --no-cache
+sudo docker compose up -d
