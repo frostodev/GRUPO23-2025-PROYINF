@@ -12,6 +12,10 @@ const Prestamo = require('./modelo/Prestamo');
 const Pago = require('./modelo/Pago');
 const HistorialCrediticio = require('./modelo/HistorialCrediticio');
 
+// --- Aquí importa y usa tu router de login ---
+const loginRouter = require('./api/login');
+app.use('/api', loginRouter);
+
 // Ruta de prueba que guarda un mensaje en la base de datos
 app.get('/save', async (req, res) => {
   try {
@@ -137,3 +141,6 @@ app.use((req, res) => {
 app.listen(port, () => {
   console.log(`App corriendo en http://localhost:${port}`);
 });
+
+const cors = require('cors');
+app.use(cors());
