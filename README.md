@@ -19,3 +19,31 @@ Puede acceder a la Wiki mediante el siguiente [enlace](https://github.com/frosto
 ## Aspectos técnicos relevantes
 
 _Todo aspecto relevante cuando para poder usar el proyecto o consideraciones del proyecto base a ser entregado_
+
+## Montado de Frontend
+
+** Para instalar npm
+
+sudo apt install nodejs npm
+
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.bashrc
+nvm install --lts
+
+npm create vite@latest frontend -- --template react
+
+El comando anterior creara la carpeta frontend.
+
+Opciones de la pantilla React (Vite)
+Use rolldown-vite (Experimental)?:
+│  No
+│
+◇  Install with npm and start now?
+│  Yes
+
+ahora usar
+npm run dev
+para inicar la app
+
+npm run dev & 
+para usarlo sin la terminal, pero ahi es tu problema como lo cierras.
