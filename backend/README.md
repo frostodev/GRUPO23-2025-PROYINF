@@ -50,4 +50,7 @@ Para detener todos los contenedores sin eliminar volúmenes:
   - docker compose down
 
 
-
+# Extras
+Abrir visualizador de DB en terminal
+sudo docker exec -it backend-postgres_db-1 sh
+psql -U user -d mydb
