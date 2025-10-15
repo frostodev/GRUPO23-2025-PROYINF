@@ -1,7 +1,13 @@
 const express = require('express');
-const pool = require('./modelo/db'); // Importar la conexión
+const pool = require('./modelo/db');
 const app = express();
 const port = 3000;
+
+// necesario para que pueda cominucarce fuera de docker
+const cors = require('cors');
+app.use(cors());
+
+app.use(express.json());
 
 app.disable('x-powered-by');
 
@@ -141,6 +147,3 @@ app.use((req, res) => {
 app.listen(port, () => {
   console.log(`App corriendo en http://localhost:${port}`);
 });
-
-const cors = require('cors');
-app.use(cors());
