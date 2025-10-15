@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   app:
     build:
@@ -31,14 +30,10 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+    image: mi-app-react
+    container_name: frontend-container
     ports:
-      - "3001:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - CHOKIDAR_USEPOLLING=true
+      - "5173:80"
 
   # pgadmin:
   #   image: dpage/pgadmin4
