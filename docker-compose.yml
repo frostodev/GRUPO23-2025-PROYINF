@@ -1,21 +1,6 @@
-version: '3.8'
-services:
-  app:
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      - DB_HOST=postgres_db
-      - DB_PORT=5432
-      - DB_USER=user
-      - DB_PASSWORD=password
-      - DB_NAME=mydb
-    depends_on:
-      - postgres_db
-    volumes:
-      - ./:/app
-      - /app/node_modules
+version: "3.8"
 
+services:
   postgres_db:
     image: postgres:15-alpine
     environment:
@@ -26,6 +11,36 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
-      
+
+  app:
+    build:
+      context: .          # usa el Dockerfile de la raíz
+      dockerfile: Dockerfile
+      target: backend-dev # ⬅️ cambia a backend-prod para producción
+    environment:
+      - DB_HOST=postgres_db
+      - DB_PORT=5432
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=mydb
+      - CHOKIDAR_USEPOLLING=1   # ayuda en Windows/WSL para hot reload
+    depends_on:
+      - postgres_db
+    volumes:
+      - ./:/app           # ⬅️ como te funciona hoy: montas TODO el repo
+      - /app/node_modules # deps se mantienen dentro del contenedor
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build:
+      context: .          # mismo Dockerfile en raíz
+      dockerfile: Dockerfile
+      target: frontend    # ⬅️ nginx sirviendo /frontend/dist
+    image: mi-app-react   # opcional
+    container_name: frontend-container
+    ports:
+      - "5173:80"
+
 volumes:
   postgres_data:
