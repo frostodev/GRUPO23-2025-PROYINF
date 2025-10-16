@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Demo de login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 700px; margin: 40px auto; }
+    textarea, input { width: 100%; padding: 5px; font-size: 100x; }
+    button { padding: 10px 16px; font-size: 16px; cursor: pointer; }
+    .respuesta { margin-top: 16px; padding: 12px; background: #f5f5f5; border-radius: 8px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Registro</h1>
+
+  <form id="form">
+    <label for="mensaje">Nombre Completo:</label>
+    <textarea id="mensaje" rows="4" placeholder=""></textarea>
+    <button type="submit">Enviar</button>
+  </form>
+
+  <form id="form">
+    <label for="mensaje">Rut:</label>
+    <textarea id="mensaje" rows="4" placeholder=""></textarea>
+    <button type="submit">Enviar</button>
+  </form>
+
+  <form id="form">
+    <label for="mensaje">Contraseña:</label>
+    <textarea id="mensaje" rows="4" placeholder=""></textarea>
+    <button type="submit">Enviar</button>
+  </form>
+
+  <form id="form">
+    <label for="mensaje">Correo:</label>
+    <textarea id="mensaje" rows="4" placeholder=""></textarea>
+    <button type="submit">Enviar</button>
+  </form>
+
+  <form id="form">
+    <label for="mensaje">Direccion:</label>
+    <textarea id="mensaje" rows="4" placeholder=""></textarea>
+    <button type="submit">Enviar</button>
+  </form>
+
+  <form id="form">
+    <label for="mensaje">telefono</label>
+    <textarea id="mensaje" rows="4" placeholder=""></textarea>
+    <button type="submit">Enviar</button>
+  </form>
+
+  
+
+  <div id="out" class="respuesta" hidden></div>
+
+  <script>
+    const form = document.getElementById('form');
+    const out  = document.getElementById('out');
+    const msgEl = document.getElementById('mensaje');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();               // evita recargar la página
+      const texto = msgEl.value.trim();
+      if (!texto) return;
+
+      // Llama a tu backend (ajusta la URL si es necesario)
+      const resp = await fetch('/api/echo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mensaje: texto })
+      });
+
+      const data = await resp.json();
+      out.hidden = false;
+      out.textContent = data.respuesta ?? '(sin respuesta)';
+    });
+  </script>
+</body>
+</html>

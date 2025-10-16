@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Demo de login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 700px; margin: 40px auto; }
+    label { display:block; margin-top: 12px; }
+    input { width: 100%; padding: 8px; font-size: 18px; }
+    button { margin-top: 16px; padding: 10px 16px; font-size: 16px; cursor: pointer; }
+    .respuesta { margin-top: 16px; padding: 12px; background: #f5f5f5; border-radius: 8px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Iniciar sesión</h1>
+
+  <form id="login-form">
+    <label for="rut">RUT</label>
+    <input id="rut" name="rut" type="text" placeholder="11.111.111-1" />
+
+    <label for="pass">Contraseña</label>
+    <input id="pass" name="pass" type="password" placeholder="••••••••" />
+
+    <button type="submit">Entrar</button>
+  </form>
+
+  <div id="out" class="respuesta" hidden></div>
+
+  <script>
+    const form = document.getElementById('login-form');
+    const out  = document.getElementById('out');
+    const rutEl = document.getElementById('rut');
+    const passEl = document.getElementById('pass');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const rut = rutEl.value.trim();
+      const contrasena = passEl.value; // no trims passwords normalmente
+
+      if (!rut || !contrasena) {
+        out.hidden = false;
+        out.textContent = 'Por favor completa RUT y contraseña.';
+        return;
+      }
+
+      try {
+        const resp = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          // En mismo origen, las cookies de sesión se manejan automáticamente
+          body: JSON.stringify({ rut, contrasena })
+        });
+
+        // Intentar parsear el JSON (aun cuando no sea 200)
+        let data = {};
+        try { data = await resp.json(); } catch (_) {}
+
+        out.hidden = false;
+
+        if (resp.ok && data.ok) {
+          // ✅ Login correcto: redirigir a la ruta protegida
+          window.location.href = '/exito';
+          return;
+        }
+
+        // Si no ok, mostrar el error devuelto o uno genérico
+        const msg = (data && data.error) ? data.error : `Error ${resp.status}`;
+        out.textContent = 'Login incorrecto: ' + msg;
+
+      } catch (err) {
+        out.hidden = false;
+        out.textContent = 'Error de red: ' + err.message;
+      }
+    });
+    if (data.ok) {
+    window.location.href = '/exito';
+    }
+
+  </script>
+</body>
+</html>
+
+

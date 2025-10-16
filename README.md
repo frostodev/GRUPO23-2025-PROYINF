@@ -1,66 +1,56 @@
-# Grupo 23
+# Aplicación Node.js con Docker y PostgreSQL
 
-Este es el repositorio del *Grupo 23*, cuyos integrantes son:
+Este es un ejemplo de una aplicación Node.js usando Express, Docker y PostgreSQL. Incluye configuración para desarrollo y producción.
 
-* Fabian San Martin - 202304650-7
-* Nicolás Muñoz  - 202273641-0
-* Arturo Almonacid - 202373515-9
-* Sergio Cárcamo - 202273512-0
-* **Tutor**: Ignacio Muñoz
+## Requisitos Previos
 
-## Wiki
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/) (v2.0+)
+- [Node.js](https://nodejs.org/) (opcional, solo para desarrollo local)
+- `curl` o cliente HTTP (para probar endpoints)
 
-Puede acceder a la Wiki mediante el siguiente [enlace](https://github.com/frostodev/GRUPO23-2025-PROYINF/wiki)
+## Instalación
 
-## Videos
+### 1. Clonar el repositorio
+git clone https://github.com/MatiasBV/analisis-y-diseno-de-software.git  
+(debe tener docker-desktop abierto en todo momento)
+Ejecutar en terminal:
 
-* [Video presentación cliente](https://aula.usm.cl/pluginfile.php/7621199/mod_resource/content/2/video1352931478.mp4)
+1. Deben navegar hasta la carpeta analisis-y-diseno-de-software/mi-proyecto-node-docker  
 
-## Aspectos técnicos relevantes
+2. (les instalará las dependencias se suele demorar un poco la primera vez con esto levantan el proyecto)  
+docker compose up --build
 
-_Todo aspecto relevante cuando para poder usar el proyecto o consideraciones del proyecto base a ser entregado_
+(para detener los contenedores)  
+docker compose down -v
 
-## Montado de Frontend
+si no les ejecuta asegurense de estar en la carpeta correcta  
+si trabajan desde windows deben tener instalado WSL2 y tenerlo activado en docker desktop  
+esto se puede verificar en  
+Configuración   
+-Resources  
+  -Configure which WSL 2 distros you want to access Docker from. (esto debe estar activo)  
+  -Enable integration with additional distros:(esto debe estar activo)  
 
-** Para instalar npm
+# Comandos útiles 
 
-sudo apt install nodejs npm
+Pueden levantar el proyecto sin volver a construir las imágenes con el siguiente comando:
+  - docker compose up
+Si quieren levantar el proyecto en segundo plano pueden usar:
+  - docker compose up -d
+Para ver el estado de los servicios que están corriendo:
+  - docker compose ps
+Para ver los logs en tiempo real de todos los servicios:
+  - docker compose logs -f
+O de un servicio específico:
+  - docker compose logs -f nombre_servicio
+Para reiniciar un servicio específico:
+  - docker compose restart nombre_servicio
+Para detener todos los contenedores sin eliminar volúmenes:
+  - docker compose down
 
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-source ~/.bashrc
-nvm install --lts
+usa para instalar el express- serssion
+docker compose exec app sh -lc "npm install --save express-session && npm ls express-session"
 
-npm create vite@latest frontend -- --template react
-
-El comando anterior creara la carpeta frontend.
-
-Opciones de la pantilla React (Vite)
-Use rolldown-vite (Experimental)?:
-│  No
-│
-◇  Install with npm and start now?
-│  Yes
-
-ahora usar
-npm run dev
-para inicar la app
-
-npm run dev & 
-para usarlo sin la terminal, pero ahi es tu problema como lo cierras.
-
-
-## Limpiar completamente los volúmenes de Docker
-
-Para **detener y borrar** todos los contenedores, redes y volúmenes (incluyendo dependencias como `node_modules` y los datos de la base de datos), ejecuta:
-
-```bash
-sudo docker compose down -v
-```
-
-sudo docker compose build --no-cache
-sudo docker compose up -d
-
-
-npm create vite@latest frontend -- --template react
-cd frontend
-npm install
+instala el nodemon
+docker compose exec app sh -lc "npm install --save-dev nodemon"
