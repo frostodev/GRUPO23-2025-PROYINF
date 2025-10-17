@@ -54,3 +54,8 @@ docker compose exec app sh -lc "npm install --save express-session && npm ls exp
 
 instala el nodemon
 docker compose exec app sh -lc "npm install --save-dev nodemon"
+
+instalar bytescryt
+
+docker exec -it grupo23-2025-proyinf sh
+npm install bcrypt
