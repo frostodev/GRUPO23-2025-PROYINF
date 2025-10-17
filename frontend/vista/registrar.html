@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Registro de cliente</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; }
+    label { display:block; margin-top: 12px; font-weight: 600; }
+    input, button { width: 100%; padding: 10px; font-size: 16px; box-sizing: border-box; }
+    input { border: 1px solid #ccc; border-radius: 6px; }
+    button { margin-top: 16px; border: 0; border-radius: 8px; background: #0a7cff; color: #fff; cursor: pointer; }
+    #out { margin-top: 14px; padding: 12px; background: #f5f5f5; border-radius: 8px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Crear cuenta</h1>
+
+  <form id="form">
+    <label>RUT</label>
+    <input id="rut" placeholder="11.111.111-1" required />
+
+    <label>Nombre</label>
+    <input id="nombre" placeholder="Ada Lovelace" required />
+
+    <label>Correo</label>
+    <input id="correo" type="email" placeholder="ada@correo.com" required />
+
+    <label>Dirección</label>
+    <input id="direccion" placeholder="Londres 123" required />
+
+    <label>Teléfono</label>
+    <input id="telefono" placeholder="123456789" required />
+
+    <label>Contraseña</label>
+    <input id="contrasena" type="password" placeholder="••••••••" required />
+
+    <button type="submit">Registrarme</button>
+  </form>
+
+  <div id="out"></div>
+
+  <script>
+    const form = document.getElementById('form');
+    const out  = document.getElementById('out');
+
+    const show = (msg) => out.textContent = (typeof msg === 'string' ? msg : JSON.stringify(msg, null, 2));
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const body = {
+        rut:        document.getElementById('rut').value.trim(),
+        nombre:     document.getElementById('nombre').value.trim(),
+        correo:     document.getElementById('correo').value.trim(),
+        direccion:  document.getElementById('direccion').value.trim(),
+        telefono:   document.getElementById('telefono').value.trim(),
+        contrasena: document.getElementById('contrasena').value
+      };
+
+      if (!body.rut || !body.nombre || !body.correo || !body.direccion || !body.telefono || !body.contrasena) {
+        return show('Completa todos los campos.');
+      }
+
+      try {
+        const resp = await fetch('/registrar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        const data = await resp.json().catch(() => ({}));
+        if (resp.ok && data.ok) {
+          show(['Registro exitoso ✅', data]);
+          // Si quieres redirigir al panel porque ya hicimos login:
+          // window.location.href = '/exito';
+        } else {
+          show('No se pudo registrar: ' + (data.error || `Error ${resp.status}`));
+        }
+      } catch (err) {
+        show('Error de red: ' + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
