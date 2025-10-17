@@ -7,18 +7,11 @@ const session = require('express-session');
 
 app.disable('x-powered-by');
 
-// ===== Modelos (no usados por ahora, pero los dejamos) =====
-const Cliente = require('./backend/modelo/Cliente');
-const Evaluacion = require('./backend/modelo/Evaluacion');
-const Solicitud = require('./backend/modelo/Solicitud');
-const Prestamo = require('./backend/modelo/Prestamo');
-const Pago = require('./backend/modelo/Pago');
-const HistorialCrediticio = require('./backend/modelo/HistorialCrediticio');
-
 // ---------- Middlewares base ----------
 
 const authCtrl = require('./backend/controlador/autentificacion');
 const registrarCtrl = require('./backend/controlador/registrar');
+const solicitudesCtrl = require('./backend/controlador/solicitudes');
 
 app.use(express.json());
 // (Opcional) si alguna vez activas cookie.secure=true detrás de proxy (nginx), descomenta:
@@ -49,6 +42,10 @@ app.use(express.static(path.join(__dirname, 'frontend'), {
   index: ['index.html', 'index.htm']
 }));
 
+app.get('/api/me', (req, res) => {
+  res.json({ ok: true, user: req.session.user || null });
+});
+
 // ---------- Diagnóstico ----------
 app.get('/api/ping', (_req, res) => res.json({ ok: true, now: Date.now() }));
 
@@ -65,22 +62,13 @@ app.get('/logout', authCtrl.logout);
 app.post('/registrar', registrarCtrl.postRegistrar); 
 
 // ---------- Página protegida ----------
-app.get('/exito', requireAuth, (req, res) => {
-  const u = req.session.user;
-  res.send(`
-    <!doctype html>
-    <html lang="es">
-    <head><meta charset="utf-8"><title>Éxito</title></head>
-    <body style="font-family:system-ui;max-width:720px;margin:40px auto;">
-      <h1>Inicio de sesión exitoso</h1>
-      <p>¡Hola, ${u.nombre}!</p>
-      <p>RUT: ${u.rut}</p>
-      <p>N° Cuenta: ${u.numero_cuenta}</p>
-      <p><a href="/logout">Cerrar sesión</a></p>
-    </body>
-    </html>
-  `);
+
+app.get('/simulador', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'vista', 'simulador.html'));
 });
+
+app.post('/simulaciones/oferta', requireAuth, solicitudesCtrl.cotizar);
+app.post('/solicitudes/crear', requireAuth, solicitudesCtrl.crearDesdeSimulacion);
 
 // ---------- Logout ----------
 app.get('/logout', (req, res) => {

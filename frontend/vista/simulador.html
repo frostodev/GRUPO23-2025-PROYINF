@@ -2,149 +2,147 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>Simulador de Crédito de Consumo</title>
+  <title>Simulador de Crédito</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root { --gap: 12px; }
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#f6f6f6; margin:0; }
     .wrap { max-width: 980px; margin: 32px auto; background:#fff; border-radius:10px; padding: 20px 20px 28px; box-shadow: 0 3px 18px rgba(0,0,0,.06); }
-    h1 { margin: 8px 0 20px; font-size: 22px; }
-    .grid { display:grid; grid-template-columns: 1fr; gap: var(--gap); }
+    h1 { margin: 4px 0 16px; font-size: 22px; }
+    .hello { color:#444; margin-bottom:12px; }
+    .grid { display:grid; grid-template-columns: 1fr; gap: 12px; }
     @media (min-width: 760px){ .grid-2 { grid-template-columns: 1fr 1fr; } }
     label { font-weight: 600; font-size: 14px; margin-bottom: 6px; display:block; }
     input, select, button { width: 100%; padding: 12px; font-size: 16px; box-sizing: border-box; }
     input, select { border:1px solid #d4d4d4; border-radius:8px; background:#fff; }
-    .note { background: #eaf4ff; border:1px solid #cfe3ff; color:#2a4a79; padding: 10px 12px; border-radius:8px; font-size: 14px; }
-    .panel { background:#fafafa; border:1px solid #eee; border-radius:10px; padding: 14px; }
+    .btn { background:#d9342b; color:#fff; border:0; border-radius:10px; padding: 12px; cursor:pointer; font-weight:700; letter-spacing:.4px; }
+    .panel { background:#fafafa; border:1px solid #eee; border-radius:10px; padding: 14px; margin-top:12px; }
     .row { display:flex; gap: 10px; align-items:center; justify-content:space-between; padding: 6px 0; border-bottom:1px dashed #eee; }
     .row:last-child { border-bottom:0; }
     .kpi { font-size: 18px; font-weight:700; }
-    .btn { background:#d9342b; color:#fff; border:0; border-radius:10px; padding: 12px; cursor:pointer; font-weight:700; letter-spacing:.4px; }
-    .btn:disabled { opacity:.6; cursor:not-allowed; }
     .muted { color:#666; font-size: 13px; }
-    .err { color:#b00020; font-size: 14px; margin-top:6px; }
-    .ok { color:#056608; font-size: 14px; margin-top:6px; }
-    .sep { height:1px; background:#eee; margin: 12px 0 6px; }
+    #msg { margin-top: 10px; color:#b00020; }
+    #ok  { margin-top: 10px; color:#056608; white-space:pre-wrap; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Simulador de Crédito de Consumo</h1>
+    <div id="hello" class="hello"></div>
 
     <div class="grid grid-2">
       <div>
-        <label for="rut">Ingresa tu RUT</label>
-        <input id="rut" placeholder="Ej: 11.111.111-1" />
-      </div>
-
-      <div>
-        <label for="monto">Ingresa el monto que necesitas</label>
+        <label for="monto">Monto solicitado</label>
         <input id="monto" placeholder="Ej: 4.500.000" />
       </div>
-
       <div>
-        <label for="renta">Ingresa tu renta líquida mensual</label>
+        <label for="renta">Renta líquida mensual</label>
         <input id="renta" placeholder="Ej: 1.000.000" />
       </div>
-
       <div>
-        <label for="cuotas">Elige cantidad de cuotas</label>
+        <label for="cuotas">Cantidad de cuotas</label>
         <select id="cuotas">
-          <option>6</option>
-          <option>12</option>
-          <option selected>24</option>
-          <option>36</option>
-          <option>48</option>
-          <option>60</option>
+          <option>6</option><option>12</option><option selected>24</option>
+          <option>36</option><option>48</option><option>60</option>
         </select>
       </div>
 
       <div>
-        <label for="tasa">Tasa anual (%)</label>
-        <input id="tasa" value="18" />
-        <div class="muted">Puedes modificarla. Se convierte a tasa mensual equivalente simple: anual/12.</div>
+        <label>Tasa anual ofrecida</label>
+        <input id="tasa" disabled placeholder="—" />
+        <div class="muted">Se calcula automáticamente según tu renta, monto y plazo.</div>
       </div>
     </div>
 
-    <div style="margin:14px 0;">
-      <div class="note">
-        La simulación es referencial y no constituye oferta. No considera seguros ni comisiones.
-      </div>
+    <div style="display:flex; gap:12px; margin: 16px 0;">
+      <button id="btnSim" class="btn">Simular</button>
+      <button id="btnSolicitud" class="btn" disabled>Aceptar y enviar solicitud</button>
     </div>
 
-    <div style="text-align:center; margin: 16px 0 10px;">
-      <button id="btn" class="btn">SIMULAR</button>
-    </div>
-
-    <div id="msg" class="err" style="display:none;"></div>
+    <div id="msg"></div>
+    <div id="ok"></div>
 
     <div id="resultado" class="panel" style="display:none;">
-      <div class="row">
-        <div>Cuota mensual estimada</div>
-        <div id="cuota" class="kpi">$0</div>
-      </div>
-      <div class="row">
-        <div>Total a pagar</div>
-        <div id="total">$0</div>
-      </div>
-      <div class="row">
-        <div>Intereses totales</div>
-        <div id="intereses">$0</div>
-      </div>
-      <div class="row">
-        <div>Carga/affordability (cuota / renta)</div>
-        <div id="carga" class="kpi">0%</div>
-      </div>
-      <div class="sep"></div>
-      <div class="muted">
-        Fórmula: cuota = P · i / (1 − (1+i)<sup>−n</sup>) con i = tasa_anual/12/100 y n = cuotas.
-      </div>
+      <div class="row"><div>Cuota mensual estimada</div><div id="cuota" class="kpi">$0</div></div>
+      <div class="row"><div>Total a pagar</div><div id="total">$0</div></div>
+      <div class="row"><div>Intereses totales</div><div id="intereses">$0</div></div>
+      <div class="row"><div>Carga (cuota/renta)</div><div id="carga" class="kpi">0%</div></div>
     </div>
   </div>
 
   <script>
     const $ = (id) => document.getElementById(id);
     const fmt = (x) => new Intl.NumberFormat('es-CL', { style:'currency', currency:'CLP', maximumFractionDigits:0 }).format(Math.round(x||0));
-    const parseCL = (s) => {
-      if (!s) return NaN;
-      return Number(String(s).replace(/\./g,'').replace(/,/g,'.').replace(/[^\d.-]/g,''));
-    };
+    const parseCL = (s) => Number(String(s||'').replace(/\./g,'').replace(/,/g,'.').replace(/[^\d.-]/g,''));
 
-    $('btn').addEventListener('click', () => {
-      $('msg').style.display = 'none';
-      $('resultado').style.display = 'none';
+    let me = null;
+    let sim = null;
 
-      const rut    = $('rut').value.trim();          // no validamos DV aquí, solo ilustrativo
-      const renta  = parseCL($('renta').value);
+    // saludo con sesión
+    fetch('/api/me').then(r => r.json()).then(d => {
+      if (!d.user) { location.href = '/'; return; }
+      me = d.user;
+      $('hello').textContent = `Hola, ${me.nombre} (Cuenta ${me.numero_cuenta})`;
+    });
+
+    $('btnSim').addEventListener('click', async () => {
+      $('msg').textContent = ''; $('ok').textContent = '';
+      $('resultado').style.display = 'none'; $('btnSolicitud').disabled = true;
+
       const monto  = parseCL($('monto').value);
+      const renta  = parseCL($('renta').value);
       const cuotas = Number($('cuotas').value);
-      const tasaAnual = Number(String($('tasa').value).replace(',', '.'));
 
-      if (!rut || !isFinite(monto) || monto <= 0 || !isFinite(renta) || renta <= 0 || !isFinite(cuotas) || cuotas <= 0 || !isFinite(tasaAnual) || tasaAnual < 0) {
-        $('msg').textContent = 'Por favor completa todos los campos con valores válidos.';
-        $('msg').style.display = 'block';
+      if (!isFinite(monto) || monto <= 0 || !isFinite(renta) || renta <= 0 || !isFinite(cuotas) || cuotas <= 0) {
+        $('msg').textContent = 'Completa todos los campos con valores válidos.';
         return;
       }
 
-      // tasa mensual simple
-      const i = (tasaAnual / 100) / 12;
+      try {
+        const resp = await fetch('/simulaciones/oferta', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ monto, renta, cuotas })
+        });
+        const data = await resp.json().catch(()=> ({}));
+        if (!(resp.ok && data.ok)) {
+          $('msg').textContent = 'No se pudo simular: ' + (data.error || `Error ${resp.status}`);
+          return;
+        }
 
-      let cuota = 0;
-      if (i === 0) {
-        cuota = monto / cuotas;
-      } else {
-        cuota = monto * i / (1 - Math.pow(1 + i, -cuotas));
+        $('tasa').value = data.tasaAnual + ' %';
+        $('cuota').textContent     = fmt(data.cuota);
+        $('total').textContent     = fmt(data.total);
+        $('intereses').textContent = fmt(data.intereses);
+        $('carga').textContent     = `${(data.carga||0).toFixed(1)}%`;
+        $('resultado').style.display = 'block';
+
+        // guardamos snapshot para enviar
+        sim = { monto, renta, cuotas, tasaAnual: data.tasaAnual, cuotaEstimada: Math.round(data.cuota) };
+        $('btnSolicitud').disabled = false;
+      } catch (err) {
+        $('msg').textContent = 'Error de red: ' + err.message;
       }
-      const total = cuota * cuotas;
-      const intereses = total - monto;
-      const carga = renta > 0 ? (cuota / renta) * 100 : 0;
+    });
 
-      $('cuota').textContent = fmt(cuota);
-      $('total').textContent = fmt(total);
-      $('intereses').textContent = fmt(intereses);
-      $('carga').textContent = `${carga.toFixed(1)}%`;
+    $('btnSolicitud').addEventListener('click', async () => {
+      if (!sim) return;
+      $('msg').textContent = ''; $('ok').textContent = '';
 
-      $('resultado').style.display = 'block';
+      try {
+        const resp = await fetch('/solicitudes/crear', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(sim)
+        });
+        const data = await resp.json().catch(()=> ({}));
+        if (resp.ok && data.ok) {
+          $('ok').textContent = `Solicitud creada ✅\nID: ${data.idSolicitud}\nEstado: ${data.estado}`;
+        } else {
+          $('msg').textContent = 'No se pudo crear la solicitud: ' + (data.error || `Error ${resp.status}`);
+        }
+      } catch (err) {
+        $('msg').textContent = 'Error de red: ' + err.message;
+      }
     });
   </script>
 </body>
