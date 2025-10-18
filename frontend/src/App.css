@@ -40,3 +40,35 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Header and layout styles */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: linear-gradient(90deg,#fff,#f7f9ff);
+  border-bottom: 1px solid #eee;
+}
+.app-header .brand {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+.app-header nav button {
+  margin-left: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.app-header nav button.active {
+  background: #eef2ff;
+  color: #2b6cb0;
+}
+.page-container {
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  text-align: left;
+}

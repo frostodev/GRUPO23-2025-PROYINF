@@ -33,14 +33,17 @@ services:
       - "3000:3000"
 
   frontend:
-    build:
-      context: .          # mismo Dockerfile en raíz
-      dockerfile: Dockerfile
-      target: frontend    # ⬅️ nginx sirviendo /frontend/dist
-    image: mi-app-react   # opcional
-    container_name: frontend-container
+    image: node:20-alpine
+    container_name: frontend-dev
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     ports:
-      - "5173:80"
+      - "5173:5173"
+    command: sh -c "npm install --silent && npm run dev -- --host 0.0.0.0 --port 5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=1
 
 volumes:
   postgres_data:
