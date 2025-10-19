@@ -1,74 +1,53 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+:root{
+  --bg: #ffffff;
+  --text: #0f1720;
+  --muted: #64748b;
+  --brand: #3b82f6;
+  --header-bg: #2563eb; /* azul fuerte */
+  --header-text: #ffffff;
+  --surface: #ffffff;
+  --border: #e6eef8;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
-/* Header and layout styles */
+/* Header */
 .app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 2rem;
-  background: linear-gradient(90deg,#fff,#f7f9ff);
-  border-bottom: 1px solid #eee;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 0.75rem 1rem;
+  background: var(--header-bg);
+  color: var(--header-text);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
-.app-header .brand {
-  font-weight: 700;
-  font-size: 1.2rem;
+.app-header .brand{ font-weight:700; font-size:1.05rem; color:var(--header-text); }
+.app-header nav button{
+  margin-left:0.5rem;
+  padding:0.45rem 0.7rem;
+  border-radius:6px;
+  border:1px solid rgba(255,255,255,0.06);
+  background:transparent;
+  color: var(--header-text);
+  cursor:pointer;
 }
-.app-header nav button {
-  margin-left: 0.5rem;
-  padding: 0.5rem 0.8rem;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  border-radius: 6px;
-}
-.app-header nav button.active {
-  background: #eef2ff;
-  color: #2b6cb0;
-}
-.page-container {
-  padding: 2rem;
-  max-width: 1000px;
-  margin: 0 auto;
-  text-align: left;
+.app-header nav button:hover{ background: rgba(255,255,255,0.06); }
+.app-header nav button:focus{ outline: 3px solid rgba(255,255,255,0.12); }
+.app-header nav button.active{ background: rgba(255,255,255,0.12); color: var(--header-text); border-color: rgba(255,255,255,0.14); }
+/* Page layout */
+.page-container{ max-width:980px; margin:1.25rem auto; padding:1rem; }
+
+main h2{ margin-top:0; }
+
+/* Cards and generic elements */
+.card{ background:var(--surface); border:1px solid var(--border); padding:1rem; border-radius:8px; }
+
+.read-the-docs{ color:var(--muted); }
+
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0b1220; --text:#e6eef8; --muted:#9fb1c8; --surface:#071024; --border:#122436 }
 }
