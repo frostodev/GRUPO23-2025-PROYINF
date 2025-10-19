@@ -4,6 +4,7 @@ import Header from './components/Header'
 import Home from './pages/Home'
 import Simulator from './pages/Simulator'
 import Profile from './pages/Profile'
+import Login from './pages/Login'
 
 function App() {
   const [page, setPage] = useState('home')
@@ -17,12 +18,7 @@ function App() {
       case 'profile':
         return <Profile />
       case 'login':
-        return (
-          <main>
-            <h2>Login</h2>
-            <p>Componente de login no encontrado en el proyecto. Implementa `src/Login.jsx` o cambia la ruta.</p>
-          </main>
-        )
+        return <Login />
       default:
         return <Home />
     }

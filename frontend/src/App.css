@@ -44,7 +44,7 @@ body {
 main h2{ margin-top:0; }
 
 /* Cards and generic elements */
-.card{ background:var(--surface); border:1px solid var(--border); padding:1rem; border-radius:8px; }
+.card{ background:var(--surface); border:1px solid var(--border); padding:1rem; border-radius:8px; color:var(--text); }
 
 .read-the-docs{ color:var(--muted); }
 

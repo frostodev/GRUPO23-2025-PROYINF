@@ -8,7 +8,7 @@ export default function Header({ onNavigate, current }) {
         <button className={current === 'home' ? 'active' : ''} onClick={() => onNavigate('home')}>Home</button>
         <button className={current === 'sim' ? 'active' : ''} onClick={() => onNavigate('sim')}>Simulador</button>
         <button className={current === 'profile' ? 'active' : ''} onClick={() => onNavigate('profile')}>Perfil</button>
-        <button onClick={() => onNavigate('login')}>Logout</button>
+        <button onClick={() => onNavigate('login')}>Login</button>
       </nav>
     </header>
   );

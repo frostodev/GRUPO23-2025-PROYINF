@@ -1,7 +1,7 @@
-.login-container{ min-height:100vh; display:flex; align-items:center; justify-content:center; background:rgba(247,250,255,0.6) }
-.login-form{ background:var(--surface); padding:1.5rem; border-radius:10px; box-shadow:0 6px 18px rgba(11,17,26,0.06); width:320px; }
+.login-container{ min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg,var(--bg), #f3f6fb) }
+.login-form{ background:var(--surface); padding:1.5rem; border-radius:10px; box-shadow:0 6px 18px rgba(11,17,26,0.06); width:320px; color:var(--text) }
 .login-form h2{ margin:0 0 0.75rem 0; color:var(--text) }
-.login-form input{ width:100%; padding:0.6rem; border:1px solid var(--border); border-radius:6px; margin-bottom:0.6rem }
+.login-form input{ width:100%; padding:0.6rem; border:1px solid var(--border); border-radius:6px; margin-bottom:0.6rem; color:var(--text); background: #fff }
 .login-form button{ width:100%; padding:0.6rem; border-radius:6px; background:var(--brand); color:#fff; border:0 }
 .login-form button:hover{ filter:brightness(0.95) }
 .error{ color:#d32f2f; text-align:center }

@@ -20,8 +20,19 @@ body{
 a{ color:var(--brand); text-decoration:none }
 a:hover{ text-decoration:underline }
 
-button{ background:var(--brand); color:white; border:0; padding:0.5rem 0.9rem; border-radius:8px; cursor:pointer }
-button.secondary{ background:transparent; color:var(--text); border:1px solid var(--border) }
+/* Primary button (default) */
+button, .btn {
+  background: var(--brand);
+  color: #fff;
+  border: 0;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.btn.secondary, button.secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+
+/* Ensure form elements use readable text color */
+input, textarea, select, label, p, div { color: var(--text); }
 
 @media (prefers-color-scheme: dark){
   :root{ --bg:#071024; --text:#e6eef8; --muted:#9fb1c8; --surface:#071024; --border:#122436 }
