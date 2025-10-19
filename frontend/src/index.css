@@ -1,10 +1,10 @@
 :root{
-  --bg: #ffffff;
-  --text: #0f1720;
-  --muted: #64748b;
-  --brand: #3b82f6;
+  --bg: #f7f7fa;
+  --text: #111111;
+  --muted: #5a5a5a;
+  --brand: #2563eb;
   --surface: #ffffff;
-  --border: #e6eef8;
+  --border: #d0d7e2;
 }
 
 *{ box-sizing: border-box }
@@ -28,12 +28,15 @@ button, .btn {
   padding: 0.5rem 0.9rem;
   border-radius: 8px;
   cursor: pointer;
+  font-weight: 500;
 }
-.btn.secondary, button.secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn.secondary, button.secondary {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
 
 /* Ensure form elements use readable text color */
 input, textarea, select, label, p, div { color: var(--text); }
 
-@media (prefers-color-scheme: dark){
-  :root{ --bg:#071024; --text:#e6eef8; --muted:#9fb1c8; --surface:#071024; --border:#122436 }
-}
+

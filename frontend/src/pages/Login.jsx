@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react'
 import '../Login.css'
 
@@ -94,3 +93,5 @@ export default function Login() {
     </div>
   )
 }
+
+app.use('/api', loginApi);

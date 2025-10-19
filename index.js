@@ -12,6 +12,7 @@ app.disable('x-powered-by');
 const authCtrl = require('./backend/controlador/autentificacion');
 const registrarCtrl = require('./backend/controlador/registrar');
 const solicitudesCtrl = require('./backend/controlador/solicitudes');
+const loginApi = require('./backend/api/login');
 
 app.use(express.json());
 // (Opcional) si alguna vez activas cookie.secure=true detrás de proxy (nginx), descomenta:
