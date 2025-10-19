@@ -59,3 +59,5 @@ instalar bytescryt
 
 docker exec -it grupo23-2025-proyinf sh
 npm install bcrypt
+
+https://drive.google.com/file/d/1IDg1gyEGYKuhO_l-iQl3u4B2kX0Jm6mc/view?usp=sharing
