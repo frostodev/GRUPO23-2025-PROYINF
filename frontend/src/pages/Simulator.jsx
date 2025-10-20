@@ -24,6 +24,8 @@ const parseCL = (s) => Number(String(s || '').replace(/\./g, '').replace(/,/g, '
 
 export default function Simulator() {
   const [me, setMe] = useState(null)
+  const [checkingAuth, setCheckingAuth] = useState(true)
+  const [apiAvailable, setApiAvailable] = useState(true)
 
   const [monto, setMonto] = useState('')
   const [renta, setRenta] = useState('')
@@ -37,11 +39,34 @@ export default function Simulator() {
 
   useEffect(() => {
     let active = true
-    fetch('/api/me').then(r => r.json()).then(d => {
-      if (!active) return
-      if (!d.user) { window.location.href = '/'; return }
-      setMe(d.user)
-    }).catch(() => {})
+    let triedOnce = false
+
+    const check = async () => {
+      try {
+        const d = await r.json().catch(() => ({}))
+        if (!active) return
+        if (d.user) {
+          setMe(d.user)
+          setCheckingAuth(false)
+          return
+        }
+        
+        // after retry: if API seems available but returned no user, redirect
+        setCheckingAuth(false)
+        if (apiAvailable) {
+          window.location.href = '/'
+        }
+        // otherwise (API not available) stay on the page in demo/offline mode
+      } catch (err) {
+        // network error — treat API as unavailable and stay on the page
+        if (!active) return
+        setApiAvailable(false)
+        setCheckingAuth(false)
+        return
+      }
+    }
+
+    check()
     return () => { active = false }
   }, [])
 
@@ -58,8 +83,33 @@ export default function Simulator() {
     }
 
     try {
+      if (!apiAvailable) {
+        // Offline/demo local calculation
+        // Simple heuristic for annual rate based on loan-to-income ratio
+        const ratio = montoN / (rentaN * 12 || 1)
+        let tasaAnual = Math.round(18 + (ratio - 1) * 10)
+        if (!isFinite(tasaAnual)) tasaAnual = 25
+        if (tasaAnual < 8) tasaAnual = 8
+        if (tasaAnual > 40) tasaAnual = 40
+
+        const r = tasaAnual / 100 / 12 // monthly rate
+        const n = cuotasN
+        let cuota = 0
+        if (r === 0) cuota = montoN / n
+        else cuota = montoN * r / (1 - Math.pow(1 + r, -n))
+        const total = cuota * n
+        const intereses = total - montoN
+        const carga = rentaN > 0 ? (cuota / rentaN) * 100 : 0
+
+        setTasa(String(tasaAnual) + ' %')
+        setResultado({ cuota: Math.round(cuota), total: Math.round(total), intereses: Math.round(intereses), carga })
+        setSim({ monto: montoN, renta: rentaN, cuotas: cuotasN, tasaAnual, cuotaEstimada: Math.round(cuota) })
+        return
+      }
+
       const resp = await fetch('/simulaciones/oferta', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ monto: montoN, renta: rentaN, cuotas: cuotasN })
       })
@@ -86,8 +136,20 @@ export default function Simulator() {
     if (!sim) return
     setMsg(''); setOk('')
     try {
+      if (!apiAvailable) {
+        // Offline: create a fake solicitud and persist locally
+        const idSolicitud = 'demo-' + Date.now()
+        const estado = 'pendiente (demo)'
+        const stored = JSON.parse(localStorage.getItem('demo_solicitudes') || '[]')
+        stored.push({ idSolicitud, estado, fecha: new Date().toISOString(), solicitud: sim })
+        localStorage.setItem('demo_solicitudes', JSON.stringify(stored))
+        setOk(`Solicitud creada (demo) ✅\nID: ${idSolicitud}\nEstado: ${estado}`)
+        return
+      }
+
       const resp = await fetch('/solicitudes/crear', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(sim)
       })
@@ -106,7 +168,7 @@ export default function Simulator() {
     <div style={{ background: '#f6f6f6', margin: -16, padding: 16 }}>
       <div style={styles.wrap}>
         <h1 style={{ margin: '4px 0 16px', fontSize: 22 }}>Simulador de Crédito de Consumo</h1>
-        <div style={styles.hello}>{me ? `Hola, ${me.nombre} (Cuenta ${me.numero_cuenta})` : ''}</div>
+  <div style={styles.hello}>{checkingAuth ? 'Verificando sesión...' : (me ? `Hola, ${me.nombre} (Cuenta ${me.numero_cuenta})` : '')}</div>
 
         <div style={{ ...styles.grid, gridTemplateColumns: '1fr', gap: 12 }}>
           <div>
@@ -133,11 +195,19 @@ export default function Simulator() {
 
         <div style={{ display: 'flex', gap: 12, margin: '16px 0' }}>
           <button style={styles.btn} onClick={onSimular}>Simular</button>
-          <button style={{ ...styles.btn, opacity: sim ? 1 : 0.6, cursor: sim ? 'pointer' : 'not-allowed' }} onClick={onEnviarSolicitud} disabled={!sim}>Aceptar y enviar solicitud</button>
+          <button
+            style={{ ...styles.btn, opacity: sim ? 1 : 0.6, cursor: sim ? 'pointer' : 'not-allowed' }}
+            onClick={onEnviarSolicitud}
+            disabled={!sim}
+          >
+            Aceptar y enviar solicitud
+          </button>
         </div>
 
-        {msg && <div style={styles.msg}>{msg}</div>}
-        {ok && <div style={styles.ok}>{ok}</div>}
+        {!apiAvailable && sim && <div style={{ marginTop: 8, color: '#666' }}>Estás en modo demo: al enviar se guardará localmente.</div>}
+
+  {msg && <div style={styles.msg}>{msg}</div>}
+  {ok && <div style={styles.ok}>{ok}</div>}
 
         {resultado && (
           <div style={styles.panel}>

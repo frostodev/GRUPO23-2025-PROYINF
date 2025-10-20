@@ -6,6 +6,7 @@ export default function Login() {
   const [contrasena, setContrasena] = useState('')
   const [mensaje, setMensaje] = useState('')
   const [tipo, setTipo] = useState('info') // 'info' | 'error' | 'ok'
+  const [loading, setLoading] = useState(false)
 
   const onSubmit = async (e) => {
     e.preventDefault()
@@ -18,21 +19,22 @@ export default function Login() {
       return
     }
 
+    setLoading(true)
     try {
       const resp = await fetch('/api/login', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rut: rutTrim, contrasena })
       })
 
-      let data = {}
-      try { data = await resp.json() } catch {}
+      const data = await resp.json().catch(() => ({}))
 
       if (resp.ok && data.ok) {
         setTipo('ok')
         setMensaje('Login correcto, redirigiendo...')
-        // simular navegación (dependiendo del router real)
-        // window.location.href = '/simulador'
+        // redirigir a simulador
+        setTimeout(() => { window.location.href = '/simulador' }, 700)
         return
       }
 
@@ -42,6 +44,8 @@ export default function Login() {
     } catch (err) {
       setTipo('error')
       setMensaje('Error de red: ' + err.message)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -58,6 +62,7 @@ export default function Login() {
           placeholder="11.111.111-1"
           value={rut}
           onChange={(e) => setRut(e.target.value)}
+          disabled={loading}
         />
 
         <label htmlFor="pass">Contraseña</label>
@@ -68,9 +73,10 @@ export default function Login() {
           placeholder="••••••••"
           value={contrasena}
           onChange={(e) => setContrasena(e.target.value)}
+          disabled={loading}
         />
 
-        <button type="submit">Entrar</button>
+        <button type="submit" disabled={loading}>{loading ? 'Entrando...' : 'Entrar'}</button>
         <div style={{ marginTop: 8 }}>
           <a href="/vista/registrar.html">Registrarse</a>
         </div>
@@ -83,7 +89,8 @@ export default function Login() {
               padding: 12,
               background: tipo === 'error' ? '#fde8e8' : tipo === 'ok' ? '#ecfdf5' : '#f5f5f5',
               color: '#111',
-              borderRadius: 8
+              borderRadius: 8,
+              textAlign: 'center'
             }}
           >
             {mensaje}
@@ -93,5 +100,4 @@ export default function Login() {
     </div>
   )
 }
-
-app.use('/api', loginApi);
+ 
