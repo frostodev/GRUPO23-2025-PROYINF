@@ -1,3 +1,9 @@
+# Primera vez iniciando la pagina
+Tener instalado node.js 20 o superior.
+cd frontend
+npm install
+npm run dev
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
