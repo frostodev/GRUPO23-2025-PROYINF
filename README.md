@@ -1,5 +1,3 @@
-docker compose up --build
-docker compose down -v
 # Proyecto: API Node.js con Docker y PostgreSQL
 
 Una plantilla de proyecto Node.js (Express) preparada para ejecutarse en contenedores Docker con PostgreSQL. Contiene el backend y el frontend básicos, además de ejemplos de controladores, modelos y vistas.
