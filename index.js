@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const pool = require('./backend/modelo/db'); // Importar la conexión (no lo usamos aún)
 const app = express();
 const port = 3000;
@@ -15,6 +16,11 @@ const solicitudesCtrl = require('./backend/controlador/solicitudes');
 const loginApi = require('./backend/api/login');
 
 app.use(express.json());
+// Habilitar CORS para todas las rutas (ajusta origin según necesidad)
+app.use(cors({
+  origin: '*',
+  credentials: true
+}));
 // (Opcional) si alguna vez activas cookie.secure=true detrás de proxy (nginx), descomenta:
 // app.set('trust proxy', 1);
 
