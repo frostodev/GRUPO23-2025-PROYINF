@@ -21,31 +21,44 @@ export default function Login() {
 
     setLoading(true)
     try {
-      const resp = await fetch('/api/login', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rut: rutTrim, contrasena })
-      })
-
-      const data = await resp.json().catch(() => ({}))
-
-      if (resp.ok && data.ok) {
-        setTipo('ok')
-        setMensaje('Login correcto, redirigiendo...')
-        // redirigir a simulador
-        setTimeout(() => { window.location.href = '/simulador' }, 700)
-        return
+      // Timeout de 5 segundos para el fetch
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      let resp, data;
+      try {
+        resp = await fetch('/api/login', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rut: rutTrim, contrasena }),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        data = await resp.json().catch(() => ({}));
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          setTipo('error');
+          setMensaje('Error: Tiempo de espera agotado (timeout).');
+          return;
+        }
+        throw err;
       }
 
-      const msg = (data && data.error) ? data.error : `Error ${resp.status}`
-      setTipo('error')
-      setMensaje('Login incorrecto: ' + msg)
+      if (resp.ok && data.ok) {
+        setTipo('ok');
+        setMensaje('¡Login exitoso! Redirigiendo...');
+        setTimeout(() => { window.location.href = '/simulador' }, 1200);
+        return;
+      }
+
+      const msg = (data && data.error) ? data.error : `Error ${resp.status}`;
+      setTipo('error');
+      setMensaje('Login incorrecto: ' + msg);
     } catch (err) {
-      setTipo('error')
-      setMensaje('Error de red: ' + err.message)
+      setTipo('error');
+      setMensaje('Error de red: ' + err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
