@@ -45,5 +45,12 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=1
 
+  adminer:
+    image: adminer # Esto es pa ver la bd en localhost:8080
+    ports:
+      - "8080:8080" 
+    depends_on:
+      - postgres_db 
+
 volumes:
   postgres_data:

@@ -1,7 +1,8 @@
-// backend/controlador/solicitudes.js
 const Solicitud = require('../modelo/Solicitud');
+const Simulacion = require('../modelo/Simulacion');
 
 // --- helpers ---
+
 function cuotaConTasa(monto, cuotas, tasaAnual) {
   const i = (tasaAnual / 100) / 12;
   if (i === 0) return monto / cuotas;
@@ -36,7 +37,7 @@ function calcularTasaOfrecida({ monto, renta, cuotas }) {
   return { tasaAnual: Number(tasa.toFixed(2)), cuota, total, intereses, carga: cargaFinal };
 }
 
-// --- endpoints ---
+
 exports.cotizar = (req, res) => {
   const user = req.session?.user;
   if (!user) return res.status(401).json({ ok:false, error:'No autenticado' });
@@ -51,26 +52,89 @@ exports.cotizar = (req, res) => {
   return res.json({ ok:true, ...r });
 };
 
+
+exports.guardarSimulacion = async (req, res) => {
+  try {
+    const user = req.session?.user;
+    if (!user) return res.status(401).json({ ok:false, error:'No autenticado' });
+
+    const { monto, renta, cuotas, tasaAnual, cuota } = req.body;
+
+    const sim = new Simulacion({
+        cliente_rut: user.rut,
+        monto: Number(monto),
+        renta: Number(renta),
+        cuotas: Number(cuotas),
+        tasa_anual: Number(tasaAnual),
+        valor_cuota: Number(cuota),
+        fecha_creacion: new Date() 
+    });
+
+    await sim.save();
+    return res.status(201).json({ ok: true, idSimulacion: sim.idSimulacion });
+
+  } catch (e) {
+    console.error('POST /simulaciones/guardar error:', e);
+    return res.status(500).json({ ok:false, error: e.message || 'Error interno' });
+  }
+};
+
+exports.obtenerSimulacionesGuardadas = async (req, res) => {
+  try {
+    const user = req.session?.user;
+    if (!user) return res.status(401).json({ ok:false, error:'No autenticado' });
+
+   
+    const simulaciones = await Simulacion.getAllByCliente(user.rut);
+    return res.json({ ok: true, simulaciones });
+
+  } catch (e) {
+    console.error('GET /simulaciones/guardadas error:', e);
+    return res.status(500).json({ ok:false, error: e.message || 'Error interno' });
+  }
+};
+
+
+// 4. CREAR SOLICITUD (Modificada)
 exports.crearDesdeSimulacion = async (req, res) => {
   try {
     const user = req.session?.user;
     if (!user) return res.status(401).json({ ok:false, error:'No autenticado' });
 
-    const { monto, renta, cuotas, tasaAnual, cuotaEstimada } = req.body || {};
-    const M = Number(monto), R = Number(renta), N = Number(cuotas), T = Number(tasaAnual);
-    if (!isFinite(M) || M<=0 || !isFinite(R) || R<=0 || !isFinite(N) || N<=0 || !isFinite(T)) {
-      return res.status(400).json({ ok:false, error:'Parámetros inválidos' });
+    // Ahora recibimos el ID de la simulación
+    const { idSimulacion } = req.body;
+    if (!idSimulacion) {
+      return res.status(400).json({ ok:false, error:'idSimulacion requerido' });
     }
 
-    const snapshot = { monto:M, renta:R, cuotas:N, tasa:T, cuotaEstimada: Math.round(Number(cuotaEstimada||0)) };
+    // Buscamos la simulación
+    const simElegida = await Simulacion.getById(idSimulacion, user.rut);
+
+    if (!simElegida || simElegida.estado !== 'activa') {
+      return res.status(404).json({ ok:false, error:'Simulación no encontrada o ya utilizada' });
+    }
+
+    // Creamos el 'snapshot'
+    const snapshot = {
+        idSimulacion: simElegida.idSimulacion,
+        monto: simElegida.monto,
+        renta: simElegida.renta,
+        cuotas: simElegida.cuotas,
+        tasa: simElegida.tasaAnual,
+        cuotaEstimada: Math.round(simElegida.valorCuota)
+    };
     const fechaSolicitud = new Date().toISOString().slice(0,10);
 
+    // Creamos la Solicitud formal
     const sol = await new Solicitud({
       clienteRut: user.rut,
       fechaSolicitud,
       documentos: JSON.stringify(snapshot),
       estado: 'pendiente'
     }).save();
+
+    // Actualizamos la simulación a 'solicitada'
+    await simElegida.updateState('solicitada');
 
     return res.status(201).json({ ok:true, idSolicitud: sol.idSolicitud, estado: sol.estado });
   } catch (e) {
