@@ -20,7 +20,7 @@ function Registro({ setPage }) {
     try {
       // --- ¡AQUÍ ESTÁ LA CONEXIÓN! ---
       // 1. Asumo que tu ruta es /api/registrar (basado en el nombre de tu archivo)
-      const resp = await fetch('/api/registrar', {
+  const resp = await fetch(`${import.meta.env.VITE_API_URL}/api/registrar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // 2. Envía el body que 'registrar.js' espera

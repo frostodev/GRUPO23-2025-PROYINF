@@ -21,7 +21,7 @@ function Simulator() {
     async function fetchUserInfo() {
       try {
         // Llama a la ruta /api/me que definiste en index.js
-        const resp = await fetch('/api/me', { credentials: 'include' });
+  const resp = await fetch(`${import.meta.env.VITE_API_URL}/api/me`, { credentials: 'include' });
         const data = await resp.json();
         
         if (data.ok && data.user) {
@@ -47,7 +47,7 @@ function Simulator() {
 
     try {
       // Llama al endpoint de 'cotizar'
-      const resp = await fetch('/api/solicitudes/cotizar', {
+  const resp = await fetch(`${import.meta.env.VITE_API_URL}/api/solicitudes/cotizar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -88,7 +88,7 @@ function Simulator() {
 
     try {
       // Llama al nuevo endpoint de 'guardar'
-      const resp = await fetch('/api/simulaciones/guardar', {
+  const resp = await fetch(`${import.meta.env.VITE_API_URL}/api/simulaciones/guardar`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

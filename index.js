@@ -4,6 +4,8 @@ const app = express();
 const port = 3000;
 const path = require('path');
 const session = require('express-session');
+const cors = require('cors');
+require('dotenv').config();
 
 app.disable('x-powered-by');
 
@@ -14,7 +16,10 @@ const registrarCtrl = require('./backend/controlador/registrar');
 const solicitudesCtrl = require('./backend/controlador/solicitudes');
 
 app.use(express.json());
-
+app.use(cors({
+  origin: process.env.FRONTEND_ORIGIN || 'http://localhost:5173',
+  credentials: true
+}));
 
 // ---------- Sesiones ----------
 app.use(session({

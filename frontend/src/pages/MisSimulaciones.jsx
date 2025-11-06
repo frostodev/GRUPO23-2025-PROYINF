@@ -23,7 +23,7 @@ function MisSimulaciones({ setPage }) {
       setError(null);
       try {
         // Llamamos al endpoint que creamos en el backend
-        const resp = await fetch('/api/simulaciones/guardadas', {
+  const resp = await fetch(`${import.meta.env.VITE_API_URL}/api/simulaciones/guardadas`, {
           credentials: 'include' // ¡Crucial! Envía la cookie de sesión
         });
         const data = await resp.json();
@@ -53,7 +53,7 @@ function MisSimulaciones({ setPage }) {
 
     try {
       // Llamamos al endpoint 'crear' que modificamos en el backend
-      const resp = await fetch('/api/solicitudes/crear', {
+  const resp = await fetch(`${import.meta.env.VITE_API_URL}/api/solicitudes/crear`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idSimulacion: idSimulacion }), // Solo enviamos el ID
