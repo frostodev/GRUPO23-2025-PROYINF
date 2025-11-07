@@ -136,10 +136,19 @@
         });
         const data = await resp.json().catch(()=> ({}));
         if (resp.ok && data.ok) {
-          $('ok').textContent = `Solicitud creada ✅\nID: ${data.idSolicitud}\nEstado: ${data.estado}`;
-        } else {
+          $('ok').textContent =
+          `Solicitud creada ✅
+          ID: ${data.idSolicitud}
+          Estado: ${data.estado}
+          Riesgo: ${data.riesgo}
+          Tasa usada: ${data.tasa} %
+          Carga: ${data.carga} %
+          Motivo: ${data.motivo}`;
+          } 
+        else {
           $('msg').textContent = 'No se pudo crear la solicitud: ' + (data.error || `Error ${resp.status}`);
-        }
+}
+
       } catch (err) {
         $('msg').textContent = 'Error de red: ' + err.message;
       }

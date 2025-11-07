@@ -26,6 +26,26 @@ class Cliente {
     return this;
   }
 
+  async depositar(monto, client = null) {
+  if (!isFinite(monto) || monto <= 0) {
+    throw new Error("Monto inválido para deposito");
+  }
+  const q = client || pool;
+
+  // Actualiza en BD y sincroniza el objeto en memoria
+  const { rows: [row] } = await q.query(
+    `UPDATE clientes
+       SET saldo_cuenta = COALESCE(saldo_cuenta, 0) + $1
+     WHERE rut = $2
+     RETURNING saldo_cuenta`,
+    [monto, this.rut]
+  );
+
+  this.saldo = row.saldo_cuenta;
+  return this;
+}
+
+
   static async getByRut(rut) {
     const { rows: [row] } = await pool.query(
       `SELECT rut, nombre, correo, direccion, telefono, numero_cuenta, saldo_cuenta
@@ -41,7 +61,7 @@ class Cliente {
     return row || null;
   }
 
-  // 🔐 Nuevo: autenticar (retorna datos públicos si OK, null si falla)
+  //  Nuevo: autenticar (retorna datos públicos si OK, null si falla)
   static async authenticate(rut, contrasena) {
     const { rows: [row] } = await pool.query(
       `SELECT rut, nombre, correo, numero_cuenta, saldo_cuenta, contrasena
@@ -61,6 +81,27 @@ class Cliente {
       saldo_cuenta: row.saldo_cuenta
     };
   }
+  static async getCliente(rut) {
+  const { rows: [row] } = await pool.query(
+    `SELECT rut, nombre, correo, direccion, telefono, numero_cuenta, saldo_cuenta
+     FROM clientes WHERE rut = $1`, [rut]
+  );
+  if (!row) return null;
+
+  const c = new Cliente(
+    row.rut,
+    row.nombre,
+    row.correo,
+    row.direccion,
+    row.telefono,
+    null
+  );
+  c.numero_cuenta = row.numero_cuenta;
+  c.saldo = row.saldo_cuenta;
+  return c;
 }
+}
+
+
 
 module.exports = Cliente;

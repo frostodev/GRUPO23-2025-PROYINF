@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Firma de Solicitud</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+      line-height: 1.4;
+      color: #222;
+    }
+    h1 { margin-bottom: 8px; }
+    p { margin-top: 0; }
+
+    label {
+      display: block;
+      margin-top: 18px;
+      font-weight: 600;
+    }
+
+    input {
+      margin-top: 6px;
+      padding: 8px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    button {
+      margin-top: 22px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      background: #3b82f6;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    #info {
+      background: #f1f1f1;
+      padding: 14px;
+      border-radius: 6px;
+      font-family: monospace;
+      margin-top: 18px;
+      white-space: pre-line;
+    }
+
+    #msg {
+      margin-top: 18px;
+      font-weight: 600;
+      white-space: pre-line;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 25px;
+      color: #3b82f6;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Firma con ClaveÚnica (Simulada)</h1>
+  <p>Para continuar, confirma tu identidad ingresando tu RUT y el código de un solo uso.</p>
+
+  <div id="info">Cargando información…</div>
+
+  <label>RUT</label>
+  <input id="rut" placeholder="12.345.678-9" autocomplete="off">
+
+  <label>Código de un solo uso (OTP)</label>
+  <input id="otp" placeholder="Ej: 123456" maxlength="6" inputmode="numeric">
+
+  <button id="btn">Firmar y Otorgar Préstamo</button>
+  <div id="msg"></div>
+
+  <a href="/estado-solicitud">Volver al estado de solicitudes</a>
+
+  <script>
+    const idSolicitud = location.pathname.split('/').pop();
+    const $ = (id)=>document.getElementById(id);
+
+    function mostrarMensaje(texto, error=false) {
+      $('msg').textContent = texto;
+      $('msg').style.color = error ? '#b91c1c' : 'black';
+    }
+
+    async function cargarDatos() {
+      const r = await fetch(`/firma/${idSolicitud}/datos`);
+      const d = await r.json();
+      if (!d.ok) {
+        $('info').textContent = 'No se pudo cargar: ' + (d.error || r.status);
+        $('btn').disabled = true;
+        return;
+      }
+
+      $('info').innerText =
+        `ID Solicitud: ${d.idSolicitud}\n` +
+        `RUT Sesión: ${d.rut}\n\n` +
+        `Código OTP (modo prueba):\n${d.otp}\n\n` +
+        `Expira en: 5 minutos`;
+    }
+
+    $('btn').addEventListener('click', async () => {
+      $('btn').disabled = true;
+      mostrarMensaje('Validando...');
+
+      const rut = $('rut').value.trim();
+      const otp = $('otp').value.trim();
+
+      if (!rut) {
+        mostrarMensaje('Ingresa tu RUT.', true);
+        $('btn').disabled = false;
+        return;
+      }
+
+      if (!otp) {
+        mostrarMensaje('Ingresa el código OTP.', true);
+        $('btn').disabled = false;
+        return;
+      }
+
+      const r = await fetch(`/firma/${idSolicitud}/validar`, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ rut, otp })
+      });
+
+      const d = await r.json();
+
+      if (!d.ok) {
+        mostrarMensaje('Error: ' + (d.error || `HTTP ${r.status}`), true);
+        $('btn').disabled = false;
+        return;
+      }
+
+      mostrarMensaje(
+        `✅ Préstamo otorgado\n\n` +
+        `ID Préstamo: ${d.idPrestamo}\n` +
+        `Monto depositado: $${d.monto}\n` +
+        `Nuevo saldo: $${d.saldo}`
+      );
+
+      setTimeout(() => location.href = '/estado-solicitud', 1800);
+    });
+
+    cargarDatos();
+  </script>
+</body>
+</html>

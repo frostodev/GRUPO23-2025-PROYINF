@@ -24,6 +24,8 @@ services:
       - DB_PASSWORD=password
       - DB_NAME=mydb
       - CHOKIDAR_USEPOLLING=1   # ayuda en Windows/WSL para hot reload
+      - MAILTRAP_USER=b7efbd3dbb6e2c       # <— TU user
+      - MAILTRAP_PASS=****77a5 
     depends_on:
       - postgres_db
     volumes:

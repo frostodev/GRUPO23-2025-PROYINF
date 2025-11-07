@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Estado de Solicitudes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body { font-family: system-ui; max-width: 800px; margin: 40px auto; }
+    table { width: 100%; border-collapse: collapse; margin-top: 25px; }
+    th, td { padding: 10px; border-bottom: 1px solid #ccc; text-align: left; }
+    th { background: #eee; }
+    a { display: inline-block; margin-top: 20px; }
+  </style>
+</head>
+
+<body>
+  <h1>Estado de tus Solicitudes</h1>
+  <p>Aquí puedes ver todas tus solicitudes ingresadas.</p>
+
+  <table id="tabla">
+  <thead>
+    <tr>
+      <th>ID Solicitud</th>
+      <th>Fecha</th>
+      <th>Estado</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+  async function cargar() {
+    const resp = await fetch('/estado-solicitud/datos');
+    const data = await resp.json();
+    if (!data.ok) return alert("Error: " + data.error);
+
+    const tbody = document.querySelector('#tabla tbody');
+    tbody.innerHTML = '';
+
+    data.solicitudes.forEach(sol => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${sol.idSolicitud}</td>
+        <td>${sol.fechaSolicitud}</td>
+        <td>${sol.estado}</td>
+        <td>
+          ${sol.estado === 'aceptada' ? `
+            <a href="/firma/${sol.idSolicitud}">Firmar</a>
+          ` : ''}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+  cargar();
+</script>
+</body>
+</html>

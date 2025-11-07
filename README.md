@@ -59,3 +59,6 @@ instalar bytescryt
 
 docker exec -it grupo23-2025-proyinf sh
 npm install bcrypt
+
+Instala nodemailer
+docker compose exec app sh -lc "npm install nodemailer && npm ls nodemailer"

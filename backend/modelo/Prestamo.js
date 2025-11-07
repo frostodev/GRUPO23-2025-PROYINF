@@ -34,17 +34,18 @@ class Prestamo {
     set plazo(v) { this._plazo = v; }
     set estado(v) { this._estado = v; }
 
-    async save() {
+    async save(client = null) {
+        const q = client || pool;
         const sql = `
-        INSERT INTO prestamo (idSolicitud, clienteRut, monto, tasa, plazo, estado)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING idPrestamo, idSolicitud, clienteRut, monto, tasa, plazo, estado
+            INSERT INTO prestamo (idSolicitud, clienteRut, monto, tasa, plazo, estado)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING idPrestamo, idSolicitud, clienteRut, monto, tasa, plazo, estado
         `;
         const vals = [this._idSolicitud, this._clienteRut, this._monto, this._tasa, this._plazo, this._estado];
-        const { rows: [row] } = await pool.query(sql, vals);
+        const { rows: [row] } = await q.query(sql, vals);
         this._idPrestamo = row.idprestamo;
         return this;
-    }
+}
 
     async update() {
         if (this._idPrestamo == null) throw new Error('idPrestamo requerido para update');

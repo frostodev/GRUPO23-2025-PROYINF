@@ -82,6 +82,9 @@ class Solicitud {
       estado: r.estado
     }));
   }
+
+  
 }
+
 
 module.exports = Solicitud;

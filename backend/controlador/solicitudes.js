@@ -1,5 +1,6 @@
 // backend/controlador/solicitudes.js
 const Solicitud = require('../modelo/Solicitud');
+const Evaluacion = require('../modelo/Evaluacion');
 
 // --- helpers ---
 function cuotaConTasa(monto, cuotas, tasaAnual) {
@@ -36,6 +37,38 @@ function calcularTasaOfrecida({ monto, renta, cuotas }) {
   return { tasaAnual: Number(tasa.toFixed(2)), cuota, total, intereses, carga: cargaFinal };
 }
 
+// Devuelve entero 1..10
+function riesgoDesdeCarga({ carga, monto, cuotas }) {
+  // base por carga (%)
+  let r;
+  if (carga <= 20) r = 1;
+  else if (carga <= 25) r = 2;
+  else if (carga <= 30) r = 3;
+  else if (carga <= 35) r = 4;
+  else if (carga <= 40) r = 5;
+  else if (carga <= 45) r = 6;
+  else if (carga <= 50) r = 7;
+  else if (carga <= 55) r = 8;
+  else if (carga <= 60) r = 9;
+  else r = 10;
+
+  // leves ajustes por plazo/monto (prudencia)
+  if (cuotas > 60 && r < 10) r += 1;
+  if (monto > 10_000_000 && r < 10) r += 1;
+
+  // bounding 1..10
+  r = Math.min(10, Math.max(1, r));
+  return r;
+}
+
+function estadoDesdeRiesgo({ riesgo, monto, cuotas }) {
+  if (riesgo <= 4) return { estado: 'aceptada', motivo: 'riesgo ≤ 4' };
+  if (riesgo === 5 && monto <= 5_000_000 && cuotas <= 48) {
+    return { estado: 'aceptada', motivo: 'riesgo 5 con monto/plazo moderados' };
+  }
+  return { estado: 'rechazada', motivo: 'riesgo alto' };
+}
+
 // --- endpoints ---
 exports.cotizar = (req, res) => {
   const user = req.session?.user;
@@ -56,25 +89,67 @@ exports.crearDesdeSimulacion = async (req, res) => {
     const user = req.session?.user;
     if (!user) return res.status(401).json({ ok:false, error:'No autenticado' });
 
-    const { monto, renta, cuotas, tasaAnual, cuotaEstimada } = req.body || {};
-    const M = Number(monto), R = Number(renta), N = Number(cuotas), T = Number(tasaAnual);
-    if (!isFinite(M) || M<=0 || !isFinite(R) || R<=0 || !isFinite(N) || N<=0 || !isFinite(T)) {
+    const { monto, renta, cuotas } = req.body || {};
+    const M = Number(monto), R = Number(renta), N = Number(cuotas);
+    if (!isFinite(M) || M <= 0 || !isFinite(R) || R <= 0 || !isFinite(N) || N <= 0) {
       return res.status(400).json({ ok:false, error:'Parámetros inválidos' });
     }
 
-    const snapshot = { monto:M, renta:R, cuotas:N, tasa:T, cuotaEstimada: Math.round(Number(cuotaEstimada||0)) };
-    const fechaSolicitud = new Date().toISOString().slice(0,10);
+    // 1) Recalcular oferta con tu helper para obtener la carga coherente
+    const oferta = calcularTasaOfrecida({ monto: M, renta: R, cuotas: N });
+    // Se espera: { tasaAnual, cuota, total, intereses, carga } // carga en %
 
-    const sol = await new Solicitud({
+    // 2) Crear solicitud en estado 'pendiente' para obtener idSolicitud (FK de evaluacion)
+    const fechaSolicitud = new Date().toISOString().slice(0,10);
+    const snapshot = {
+      monto: M,
+      renta: R,
+      cuotas: N,
+      tasaSimulada: oferta.tasaAnual,
+      cuotaEstimada: Math.round(oferta.cuota),
+      cargaPorc: Number(oferta.carga.toFixed(1))
+    };
+
+    const solicitud = await new Solicitud({
       clienteRut: user.rut,
       fechaSolicitud,
       documentos: JSON.stringify(snapshot),
       estado: 'pendiente'
     }).save();
 
-    return res.status(201).json({ ok:true, idSolicitud: sol.idSolicitud, estado: sol.estado });
+    // 3) Calcular riesgo 1..10 y guardar en EVALUACION
+    const riesgo = riesgoDesdeCarga({
+      carga: snapshot.cargaPorc,
+      monto: M,
+      cuotas: N
+    });
+
+    const eva = await new Evaluacion({
+      idSolicitud: solicitud.idSolicitud,
+      clienteRut: user.rut,
+      riesgo
+    }).save();
+
+    // 4) Decidir estado desde el número de riesgo (tomado de evaluacion)
+    const decision = estadoDesdeRiesgo({ riesgo, monto: M, cuotas: N });
+
+    // 5) Actualizar la solicitud con el estado final
+    solicitud.estado = decision.estado;
+    await solicitud.update();
+
+    // 6) Responder mostrando trazabilidad
+    return res.status(201).json({
+      ok: true,
+      idSolicitud: solicitud.idSolicitud,
+      estado: solicitud.estado,
+      riesgo: eva.riesgo,
+      carga: snapshot.cargaPorc,
+      tasa: snapshot.tasaSimulada,
+      motivo: decision.motivo
+    });
   } catch (e) {
     console.error('POST /solicitudes/crear error:', e);
     return res.status(500).json({ ok:false, error: e.message || 'Error interno' });
   }
 };
+

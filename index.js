@@ -8,10 +8,19 @@ const session = require('express-session');
 app.disable('x-powered-by');
 
 // ---------- Middlewares base ----------
+const Cliente = require('./backend/modelo/Cliente');
+const Evaluacion = require('./backend/modelo/Evaluacion');
+const HistorialCrediticio = require('./backend/modelo/HistorialCrediticio');
+const Pago = require('./backend/modelo/Pago');
+const Prestamo = require('./backend/modelo/Prestamo');
+const Solicitud = require('./backend/modelo/Solicitud');
 
 const authCtrl = require('./backend/controlador/autentificacion');
 const registrarCtrl = require('./backend/controlador/registrar');
 const solicitudesCtrl = require('./backend/controlador/solicitudes');
+const estadoSolicitudCtrl = require('./backend/controlador/estadoSolicitud');
+const firma = require('./backend/controlador/firma');
+
 
 app.use(express.json());
 // (Opcional) si alguna vez activas cookie.secure=true detrás de proxy (nginx), descomenta:
@@ -19,14 +28,13 @@ app.use(express.json());
 
 // ---------- Sesiones ----------
 app.use(session({
-  secret: '1234',          // ⚠️ cámbialo en prod
+  secret: '1234',
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
     sameSite: 'lax',
-    // secure: true,       // usa true solo con HTTPS
-    maxAge: 1000 * 60 * 60 // 1 hora
+    // secure: true   // dejar comentado en localhost
   }
 }));
 
@@ -63,9 +71,23 @@ app.post('/registrar', registrarCtrl.postRegistrar);
 
 // ---------- Página protegida ----------
 
+app.get('/menu', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'vista', 'menu.html'));
+});
+
+app.get('/estado-solicitud', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'vista', 'estado-solicitud.html')); // o 'vistas'
+});
+app.get('/estado-solicitud/datos', requireAuth, estadoSolicitudCtrl.listar);
+
 app.get('/simulador', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'vista', 'simulador.html'));
 });
+
+// Vistas/servicios de firma
+app.get('/firma/:id', requireAuth, firma.vista);
+app.get('/firma/:id/datos', requireAuth, firma.datos);       // genera OTP y lo entrega (modo pruebas)
+app.post('/firma/:id/validar', requireAuth, firma.validar);  // valida y otorga préstamo
 
 app.post('/simulaciones/oferta', requireAuth, solicitudesCtrl.cotizar);
 app.post('/solicitudes/crear', requireAuth, solicitudesCtrl.crearDesdeSimulacion);
