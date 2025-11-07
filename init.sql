@@ -95,7 +95,6 @@ ALTER TABLE clientes
     USING LPAD(numero_cuenta::text, 16, '0'),
   ALTER COLUMN numero_cuenta SET DEFAULT LPAD(nextval('cuenta_num_seq')::text, 16, '0');
 
--- 3) (opcional) check de 16 dígitos
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -106,3 +105,8 @@ BEGIN
       CHECK (numero_cuenta ~ '^[0-9]{16}$');
   END IF;
 END$$;
+
+-- Usuario(s) inicial(es)
+-- Inserción corregida: dejar que el DEFAULT genere el número de cuenta (16 dígitos)
+INSERT INTO clientes (rut, nombre, correo, direccion, telefono, numero_cuenta, saldo_cuenta, contrasena)
+VALUES ('1', '1', '1@1.cl', '1', '1', DEFAULT, 1, '1');
