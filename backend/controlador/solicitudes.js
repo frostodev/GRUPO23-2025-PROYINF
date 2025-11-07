@@ -58,17 +58,27 @@ exports.guardarSimulacion = async (req, res) => {
     const user = req.session?.user;
     if (!user) return res.status(401).json({ ok:false, error:'No autenticado' });
 
+    // Log para depuración: mostrar la sesión y el body recibido
+    console.log('guardarSimulacion session.user =', req.session ? req.session.user : null);
+    console.log('guardarSimulacion body =', req.body);
+
     const { monto, renta, cuotas, tasaAnual, cuota } = req.body;
 
-    const sim = new Simulacion({
-        cliente_rut: user.rut,
-        monto: Number(monto),
-        renta: Number(renta),
-        cuotas: Number(cuotas),
-        tasa_anual: Number(tasaAnual),
-        valor_cuota: Number(cuota),
-        fecha_creacion: new Date() 
-    });
+    // Validación: asegurar que la sesión tenga rut del cliente
+    if (!user.rut) {
+      console.error('guardarSimulacion: sesión inválida, falta user.rut', req.session.user);
+      return res.status(400).json({ ok:false, error:'Sesión inválida: rut del cliente no disponible' });
+    }
+
+  const sim = new Simulacion({
+    clienteRut: user.rut,
+    monto: Number(monto),
+    renta: Number(renta),
+    cuotas: Number(cuotas),
+    tasa_anual: Number(tasaAnual),
+    valor_cuota: Number(cuota),
+    fecha_creacion: new Date()
+  });
 
     await sim.save();
     return res.status(201).json({ ok: true, idSimulacion: sim.idSimulacion });

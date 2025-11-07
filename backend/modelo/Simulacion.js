@@ -13,7 +13,8 @@ class Simulacion {
     estado = 'activa'
   }) {
     this._id_simulacion = id_simulacion;
-    this._clienteRut = clienteRut || cliente_rut; 
+  // Asegurarse de usar el parámetro pasado; eliminar referencia a variable inexistente
+    this._clienteRut = clienteRut;
     this._fecha_creacion = fecha_creacion;
     this._monto = monto;
     this._renta = renta;
