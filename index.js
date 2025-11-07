@@ -14,8 +14,7 @@ const registrarCtrl = require('./backend/controlador/registrar');
 const solicitudesCtrl = require('./backend/controlador/solicitudes');
 
 app.use(express.json());
-// (Opcional) si alguna vez activas cookie.secure=true detrás de proxy (nginx), descomenta:
-// app.set('trust proxy', 1);
+
 
 // ---------- Sesiones ----------
 app.use(session({
@@ -34,7 +33,8 @@ app.use(session({
 function requireAuth(req, res, next) {
   // sin optional chaining para evitar problemas de versión
   if (req.session && req.session.user) return next();
-  return res.status(401).send('No autenticado');
+  // Corregido: Devolver JSON para que el frontend lo entienda
+  return res.status(401).json({ ok: false, error: 'No autenticado' }); 
 }
 
 // ---------- Estáticos ----------
@@ -50,44 +50,33 @@ app.get('/api/me', (req, res) => {
 app.get('/api/ping', (_req, res) => res.json({ ok: true, now: Date.now() }));
 
 app.get('/api/ping-session', (req, res) => {
-  // debe incrementar entre requests si la cookie de sesión está funcionando
+  // ... (código sin cambios)
   if (!req.session.test) req.session.test = 0;
   req.session.test += 1;
   res.json({ ok: true, counter: req.session.test });
 });
 
-// ---------- Login ----------
+// ---------- API de Login y Registro ----------
 app.post('/api/login', authCtrl.postLogin);
-app.get('/logout', authCtrl.logout);
-app.post('/registrar', registrarCtrl.postRegistrar); 
+app.post('/api/registrar', registrarCtrl.postRegistrar); // <-- Corregido (tenía /api/registrar)
+app.get('/api/logout', authCtrl.logout); // <-- Corregido (movido y renombrado a /api)
 
-// ---------- Página protegida ----------
+// ---------- API de Solicitudes y Simulaciones ----------
+app.post('/api/solicitudes/cotizar', requireAuth, solicitudesCtrl.cotizar);
+app.post('/api/simulaciones/guardar', requireAuth, solicitudesCtrl.guardarSimulacion);
+app.get('/api/simulaciones/guardadas', requireAuth, solicitudesCtrl.obtenerSimulacionesGuardadas);
+app.post('/api/solicitudes/crear', requireAuth, solicitudesCtrl.crearDesdeSimulacion);
 
-app.get('/simulador', requireAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'vista', 'simulador.html'));
-});
-
-app.post('/simulaciones/oferta', requireAuth, solicitudesCtrl.cotizar);
-app.post('/solicitudes/crear', requireAuth, solicitudesCtrl.crearDesdeSimulacion);
-
-// ---------- Logout ----------
-app.get('/logout', (req, res) => {
-  req.session.destroy(err => {
-    if (err) {
-      console.error('Error al cerrar sesión:', err);
-      return res.status(500).send('No se pudo cerrar sesión');
-    }
-    res.clearCookie('connect.sid'); // nombre por defecto
-    res.redirect('/');
-  });
-});
 
 // ---------- 404 ----------
 app.use((req, res) => {
-  res.status(404).send('404 Not Found');
+  if (!req.path.startsWith('/api/')) {
+    return res.sendFile(path.join(__dirname, 'frontend', 'index.html'));
+  }
+  res.status(404).json({ ok: false, error: '404 Not Found' });
 });
 
-// ---------- Error handler global (no deja que el server muera sin mensaje) ----------
+// ---------- Error handler global ----------
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   try {

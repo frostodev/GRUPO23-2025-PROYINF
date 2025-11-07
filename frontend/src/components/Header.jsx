@@ -1,15 +1,18 @@
 import React from 'react';
 
-export default function Header({ onNavigate, current }) {
+
+function Header({ onNavigate, current, onLogout }) {
   return (
-    <header className="app-header">
-      <div className="brand">Mi App</div>
+    <header>
       <nav>
-        <button className={current === 'home' ? 'active' : ''} onClick={() => onNavigate('home')}>Home</button>
-        <button className={current === 'sim' ? 'active' : ''} onClick={() => onNavigate('sim')}>Simulador</button>
-        <button className={current === 'profile' ? 'active' : ''} onClick={() => onNavigate('profile')}>Perfil</button>
-        <button onClick={() => onNavigate('login')}>Logout</button>
+        <button onClick={() => onNavigate('home')}>Home</button>
+        <button onClick={() => onNavigate('sim')}>Simulador</button>
+        <button onClick={() => onNavigate('profile')}>Perfil</button>
+        <button onClick={onLogout} style={{ float: 'right' }}>Cerrar Sesión</button>
+        <button onClick={() => onNavigate('misSimulaciones')}>Mis Simulaciones</button>
       </nav>
     </header>
   );
 }
+
+export default Header;

@@ -72,6 +72,19 @@ CREATE TABLE pago (
 );
 
 
+CREATE TABLE simulaciones (
+  id_simulacion SERIAL PRIMARY KEY,
+	clienteRut VARCHAR(20) NOT NULL,
+  fecha_creacion DATE NOT NULL,   
+  monto INT NOT NULL,
+  renta INT NOT NULL,
+  cuotas INT NOT NULL,
+  tasa_anual DECIMAL NOT NULL,
+  valor_cuota DECIMAL NOT NULL,
+  estado VARCHAR(20) DEFAULT 'activa', 
+	FOREIGN KEY (clienteRut) REFERENCES clientes(rut) ON DELETE CASCADE
+);
+
 
 -- 1) Crea la secuencia si no existe
 CREATE SEQUENCE IF NOT EXISTS cuenta_num_seq START 1;
