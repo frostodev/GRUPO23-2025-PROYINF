@@ -121,7 +121,7 @@ npm run dev
 
 Video de demostración del avance:
 
-https://drive.google.com/file/d/1IDg1gyEGYKuhO_l-iQl3u4B2kX0Jm6mc/view?usp=sharing
+https://drive.google.com/file/d/1uH1eU-WkwLLAg3DSotu1IK1EoL0yeTex/view?usp=sharing
 
 ## Consejos y notas
 
